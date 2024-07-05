@@ -161,165 +161,163 @@ if selected_group:
         filtered_data = df[df['taxon_code'].isin(filtered_taxon_codes)].copy()
 
 
-        # Additional dynamic filtering options
-        st.sidebar.header("Additional Filters")
+    # Additional dynamic filtering options
+    st.sidebar.header("Additional Filters")
 
-        # Options to select which filters to display
-        filter_options = st.sidebar.multiselect(
-            'Select Filters to Display',
-            ['Full_name','Tenure','Gender', 'Individual Location', 'Individual State', 'Individual County', 'Individual ZIP Code', 'Sole Proprietor', 'Telehealth','Medicare']
-        )
+    # Options to select which filters to display
+    filter_options = st.sidebar.multiselect(
+        'Select Filters to Display',
+        ['Full_name','Tenure','Gender', 'Individual Location', 'Individual State', 'Individual County', 'Individual ZIP Code', 'Sole Proprietor', 'Telehealth','Medicare']
+    )
 
-        # Filter by gender
-        if 'Gender' in filter_options:
-            genders = sorted(filtered_data['gender'].astype(str).unique())
-            selected_gender = st.sidebar.selectbox('Select Gender', [''] + list(genders))
-            if selected_gender:
-                filtered_data = filtered_data[filtered_data['gender'] == selected_gender].copy()
+    # Filter by gender
+    if 'Gender' in filter_options:
+        genders = sorted(filtered_data['gender'].astype(str).unique())
+        selected_gender = st.sidebar.selectbox('Select Gender', [''] + list(genders))
+        if selected_gender:
+            filtered_data = filtered_data[filtered_data['gender'] == selected_gender].copy()
 
-        # Filter by individual_location
-        if 'Individual Location' in filter_options:
-            individual_places = sorted(filtered_data['individual_place'].astype(str).unique())
-            selected_places = st.sidebar.selectbox('Select Candidate Location', [''] + list(individual_places))
-            if selected_places:
-                filtered_data = filtered_data[filtered_data['individual_place'] == selected_places].copy()
+    # Filter by individual_location
+    if 'Individual Location' in filter_options:
+        individual_places = sorted(filtered_data['individual_place'].astype(str).unique())
+        selected_places = st.sidebar.selectbox('Select Candidate Location', [''] + list(individual_places))
+        if selected_places:
+            filtered_data = filtered_data[filtered_data['individual_place'] == selected_places].copy()
 
-        # Filter by individual_state
-        if 'Individual State' in filter_options:
-            individual_states = sorted(filtered_data['individual_state'].astype(str).unique())
-            selected_state = st.sidebar.selectbox('Select Individual State', [''] + list(individual_states))
-            if selected_state:
-                filtered_data = filtered_data[filtered_data['individual_state'] == selected_state].copy()
+    # Filter by individual_state
+    if 'Individual State' in filter_options:
+        individual_states = sorted(filtered_data['individual_state'].astype(str).unique())
+        selected_state = st.sidebar.selectbox('Select Individual State', [''] + list(individual_states))
+        if selected_state:
+            filtered_data = filtered_data[filtered_data['individual_state'] == selected_state].copy()
 
-        # Filter by individual_county
-        if 'Individual County' in filter_options:
-            individual_counties = sorted(filtered_data['individual_county'].astype(str).unique())
-            selected_county = st.sidebar.selectbox('Select Individual County', [''] + list(individual_counties))
-            if selected_county:
-                filtered_data = filtered_data[filtered_data['individual_county'] == selected_county].copy()
+    # Filter by individual_county
+    if 'Individual County' in filter_options:
+        individual_counties = sorted(filtered_data['individual_county'].astype(str).unique())
+        selected_county = st.sidebar.selectbox('Select Individual County', [''] + list(individual_counties))
+        if selected_county:
+            filtered_data = filtered_data[filtered_data['individual_county'] == selected_county].copy()
 
-        # Filter by individual_zip5
-        if 'Individual ZIP Code' in filter_options:
-            individual_zip5s = sorted(filtered_data['individual_zip5'].astype(str).unique())
-            selected_zip5 = st.sidebar.selectbox('Select Individual ZIP Code', [''] + list(individual_zip5s))
-            if selected_zip5:
-                filtered_data = filtered_data[filtered_data['individual_zip5'] == selected_zip5].copy()
+    # Filter by individual_zip5
+    if 'Individual ZIP Code' in filter_options:
+        individual_zip5s = sorted(filtered_data['individual_zip5'].astype(str).unique())
+        selected_zip5 = st.sidebar.selectbox('Select Individual ZIP Code', [''] + list(individual_zip5s))
+        if selected_zip5:
+            filtered_data = filtered_data[filtered_data['individual_zip5'] == selected_zip5].copy()
 
-        # Filter by telehealth
-        if 'Telehealth' in filter_options:
-            selected_telehealth = st.sidebar.checkbox('Filter by Telehealth Certification')
-            if selected_telehealth:
-                filtered_data = filtered_data[filtered_data['telehealth'] == True].copy()
+    # Filter by telehealth
+    if 'Telehealth' in filter_options:
+        selected_telehealth = st.sidebar.checkbox('Filter by Telehealth Certification')
+        if selected_telehealth:
+            filtered_data = filtered_data[filtered_data['telehealth'] == True].copy()
 
-        # Filter by sole_proprietor
-        if 'Sole Proprietor' in filter_options:
-            selected_sole_proprietor = st.sidebar.checkbox('Filter by Sole Proprietorship')
-            if selected_sole_proprietor:
-                filtered_data = filtered_data[filtered_data['sole_proprietor'] == True].copy()
+    # Filter by sole_proprietor
+    if 'Sole Proprietor' in filter_options:
+        selected_sole_proprietor = st.sidebar.checkbox('Filter by Sole Proprietorship')
+        if selected_sole_proprietor:
+            filtered_data = filtered_data[filtered_data['sole_proprietor'] == True].copy()
 
-        # Filter by medicare
-        if 'Medicare' in filter_options:
-            selected_medicare = st.sidebar.checkbox('Filter by Medicare')
-            if selected_medicare:
-                filtered_data = filtered_data[filtered_data['medicare_id'].notnull()].copy()
+    # Filter by medicare
+    if 'Medicare' in filter_options:
+        selected_medicare = st.sidebar.checkbox('Filter by Medicare')
+        if selected_medicare:
+            filtered_data = filtered_data[filtered_data['medicare_id'].notnull()].copy()
 
-        # Tenure advanced filter
-        if 'Tenure' in filter_options:
-                # Drop NA values before computing min and max
-                filtered_data_non_na_tenure = filtered_data['tenure'].dropna()
-                if not filtered_data_non_na_tenure.empty:
-                    min_tenure = int(filtered_data_non_na_tenure.min())
-                    max_tenure = int(filtered_data_non_na_tenure.max())
-                    if min_tenure < max_tenure:
-                        selected_tenure = st.sidebar.slider('Select Tenure', min_tenure, max_tenure, (min_tenure, max_tenure))
-                        filtered_data = filtered_data[(filtered_data['tenure'] >= selected_tenure[0]) & (filtered_data['tenure'] <= selected_tenure[1])]
-                    else:
-                        st.sidebar.write(f"Tenure: {min_tenure} years")
-        
-        # Filter by part of the full name
-        if 'Full Name' in filter_options:
-            name_part = st.sidebar.text_input('Filter by Full Name')
-            if name_part:
-                filtered_data = filtered_data[filtered_data['full_name'].str.contains(name_part, case=False, na=False)].copy()
-        
-        # Rename columns for better display
-        filtered_data = filtered_data.rename(columns={
-                    'full_name':'Full Name',
-                    'taxon_code':'Taxon Code',
-                    'taxon_state':'License State',
-                    'nucc_group':'NUCC Group',
-                    'nucc_classification':'NUCC Classification',
-                    'nucc_specialization':'NUCC Specialization',
-                    'individual_state': 'Individual State',
-                    'individual_place': 'Individual Place',
-                    'individual_zip5': 'Individual Post Code', 
-                    'individual_county':'Individual County',
-                    'individual_state':'Individual State',
-                    'facility_name':'Facility Name',
-                    'facility_place':'Facility Place',
-                    'facility_zip5': 'Facility Postcode',
-                    'facility_state':'Facility State',
-                    'medical_school':'Medical School',
-                    'tenure':'Tenure',
-                    'graduation_year':'Graduation Year',
-                    'gender':'Gender',
-                    'full_name_other':'Full Name, other',
-                    'sole_proprietor': 'Sole Proprietor',
-                    'npi': 'NPI',
-                    'npi_replacement': 'NPI, other',
-                    'medicare_id':'Medicare ID',
-                    'telehealth':'Telehealth',
-                    'medicare_specialty':'Medicare Specialty',
-                    'county_code':'County Code',
-                    'geo_id':'Geo ID',
-                    'lat':'Latitude',
-                    'long':'Longitude',
-                    'dni':'DNI'
-        })
+    # Tenure advanced filter
+    if 'Tenure' in filter_options:
+            # Drop NA values before computing min and max
+            filtered_data_non_na_tenure = filtered_data['tenure'].dropna()
+            if not filtered_data_non_na_tenure.empty:
+                min_tenure = int(filtered_data_non_na_tenure.min())
+                max_tenure = int(filtered_data_non_na_tenure.max())
+                if min_tenure < max_tenure:
+                    selected_tenure = st.sidebar.slider('Select Tenure', min_tenure, max_tenure, (min_tenure, max_tenure))
+                    filtered_data = filtered_data[(filtered_data['tenure'] >= selected_tenure[0]) & (filtered_data['tenure'] <= selected_tenure[1])]
+                else:
+                    st.sidebar.write(f"Tenure: {min_tenure} years")
+    
+    # Filter by part of the full name
+    if 'Full Name' in filter_options:
+        name_part = st.sidebar.text_input('Filter by Full Name')
+        if name_part:
+            filtered_data = filtered_data[filtered_data['full_name'].str.contains(name_part, case=False, na=False)].copy()
+    
+    # Rename columns for better display
+    filtered_data = filtered_data.rename(columns={
+                'full_name':'Full Name',
+                'taxon_code':'Taxon Code',
+                'taxon_state':'License State',
+                'nucc_group':'NUCC Group',
+                'nucc_classification':'NUCC Classification',
+                'nucc_specialization':'NUCC Specialization',
+                'individual_state': 'Individual State',
+                'individual_place': 'Individual Place',
+                'individual_zip5': 'Individual Post Code', 
+                'individual_county':'Individual County',
+                'individual_state':'Individual State',
+                'facility_name':'Facility Name',
+                'facility_place':'Facility Place',
+                'facility_zip5': 'Facility Postcode',
+                'facility_state':'Facility State',
+                'medical_school':'Medical School',
+                'tenure':'Tenure',
+                'graduation_year':'Graduation Year',
+                'gender':'Gender',
+                'full_name_other':'Full Name, other',
+                'sole_proprietor': 'Sole Proprietor',
+                'npi': 'NPI',
+                'npi_replacement': 'NPI, other',
+                'medicare_id':'Medicare ID',
+                'telehealth':'Telehealth',
+                'medicare_specialty':'Medicare Specialty',
+                'county_code':'County Code',
+                'geo_id':'Geo ID',
+                'lat':'Latitude',
+                'long':'Longitude',
+                'dni':'DNI'
+    })
 
-        # Set default columns to display
-        default_columns = ['Full Name', 'License State', 'NUCC Group', 'NUCC Classification', 'NUCC Specialization']
+    # Set default columns to display
+    default_columns = ['Full Name', 'License State', 'NUCC Group', 'NUCC Classification', 'NUCC Specialization']
 
-        # Allow the user to select which additional fields to display
-        st.sidebar.header("Additional Display Options")
-        columns = [col for col in filtered_data.columns if col not in default_columns]
-        additional_columns = st.sidebar.multiselect('Select Additional Columns to Display', columns)
+    # Allow the user to select which additional fields to display
+    st.sidebar.header("Additional Display Options")
+    columns = [col for col in filtered_data.columns if col not in default_columns]
+    additional_columns = st.sidebar.multiselect('Select Additional Columns to Display', columns)
 
-        # Combine default and additional columns
-        displayed_columns = default_columns + additional_columns
+    # Combine default and additional columns
+    displayed_columns = default_columns + additional_columns
 
-        # Grouping the data should be done on the filtered_data DataFrame
-        grouped_data = filtered_data.groupby(displayed_columns, as_index=False).first()
+    # Grouping the data should be done on the filtered_data DataFrame
+    grouped_data = filtered_data.groupby(displayed_columns, as_index=False).first()
 
-        st.write(f"Number of possible candidates: {len(grouped_data)}")
+    st.write(f"Number of possible candidates: {len(grouped_data)}")
 
-        st.markdown(
-        """
-        <style>
-        .dataframe { width: 100% !important; }
-        </style>
-        """, unsafe_allow_html=True
-        )
+    st.markdown(
+    """
+    <style>
+    .dataframe { width: 100% !important; }
+    </style>
+    """, unsafe_allow_html=True
+    )
 
-        # Display the combined table
-        st.write("Displayed Data:")
-        event = st.dataframe(
-            grouped_data[displayed_columns], 
-            key='combined_editor',
-            on_select="rerun",
-            selection_mode="multi-row",
-            hide_index=True)    
+    # Display the combined table
+    st.write("Displayed Data:")
+    event = st.dataframe(
+        grouped_data[displayed_columns], 
+        key='combined_editor',
+        on_select="rerun",
+        selection_mode="multi-row",
+        hide_index=True)    
 
-        logger.info(f"selected rows {event.selection}")
+    logger.info(f"selected rows {event.selection}")
 
-        # Save the selected data into session state
-        if 'selection' in event and event['selection']:
-            selected_data = grouped_data.iloc[event['selection']]
-            st.session_state.selected_data = selected_data
+    selected_data =  {}
 
-        # Button to navigate to the download page
-        if st.button('Go to Download Page'):
-            st.experimental_set_query_params(page='download')
+    # Save the selected data into session state
+    if 'rows' in event.selection:
+        selected_data = grouped_data.iloc[event.selection.rows]
+        st.session_state.selected_data = selected_data
 
 
 else:

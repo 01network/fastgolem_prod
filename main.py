@@ -13,7 +13,7 @@ secrets = st.secrets
 # Ensure .data folder exists
 data_folder = '.data'
 os.makedirs(data_folder, exist_ok=True)
-logger.info(f"/.data folder created")
+logger.info(f"./data folder created")
 
 # Check if the file .data/hcp_data.csv exists
 if os.path.exists(os.path.join(data_folder, 'hcp_data.csv')):
@@ -48,8 +48,6 @@ def save_uploaded_file(uploaded_file):
     logger.info(f"File {uploaded_file.name} saved successfully")
 
 # # File upload section
-# st.title("CSV File Upload")
-
 if not st.session_state.file_uploaded:
     uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
     if uploaded_file is not None:
