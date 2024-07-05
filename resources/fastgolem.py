@@ -92,7 +92,7 @@ df = load_csv(csv_file_path)
 
 def get_next_level_options(tree, selections):
     """Get options for the next level based on current selection"""
-    logger.info(f"get_next_level_option function called")
+    logger.info("get_next_level_option function called")
     node = tree
     for selection in selections:
         if selection in node:
@@ -101,26 +101,24 @@ def get_next_level_options(tree, selections):
             return []
     return [key for key in node.keys() if key != 'value']
 
-def filter_data_by_classification(tree, group, classification, df):
-    """Filter data by selected classification"""
-    logger.info(f"filter_data_by_classification function called")
-    node = tree[group][classification]
-    filtered_taxon_codes = [node[specialization]['value'].get('nucc_code', 'null')
-                            for specialization in node 
-                            if specialization != 'value' and 'value' in node[specialization]
-                            ]
-    return df[df['taxon_code'].isin(filtered_taxon_codes)].copy()
+def get_all_taxon_codes(node):
+    """Recursively get all taxon codes from a node and its children"""
+    taxon_codes = []
+    if 'value' in node:
+        taxon_codes.append(node['value'].get('nucc_code', 'null'))
+    for key in node:
+        if key != 'value' and isinstance(node[key], dict):
+            taxon_codes.extend(get_all_taxon_codes(node[key]))
+    return taxon_codes
 
 def filter_data_by_group(tree, group, df):
-    """Filter data by selected group"""
-    logger.info(f"filter_data_by_group function called")
+    """Filter data by selected group using taxon_code of all child and grandchild nodes"""
+    logger.info("filter_data_by_group function called")
     node = tree[group]
-    filtered_taxon_codes = []
-    for classification in node:
-        class_node = node[classification]
-        for specialization in class_node:
-            if specialization != 'value' and 'value' in class_node[specialization]:
-                filtered_taxon_codes.append(class_node[specialization]['value'].get('nucc_code', 'null'))
+    filtered_taxon_codes = get_all_taxon_codes(node)
+    if not filtered_taxon_codes:
+        # If no taxon codes are found in the group, use the group's own code
+        filtered_taxon_codes = [group]
     return df[df['taxon_code'].isin(filtered_taxon_codes)].copy()
 
 # Sidebar for n-ary tree search
@@ -129,14 +127,14 @@ st.sidebar.write(f"You are logged in as {st.session_state.role}")
 
 # Dropdown for group level
 groups = sorted(list(tree_dict.keys()))
-selected_group = st.sidebar.selectbox('Select Group', [''] + groups, help='Defines the type of practitioner by education')
+selected_group = st.sidebar.selectbox('Select Group', [''] + groups, help='Defines the type of practitioner by education', key='group_selectbox')
 
 if selected_group:
-    filtered_data = df[df['taxon_code'] == selected_group].copy()
+    filtered_data = filter_data_by_group(tree_dict, selected_group, df)
 
     # Dropdown for classification level
     classifications = sorted(get_next_level_options(tree_dict, [selected_group]))
-    selected_classification = st.sidebar.selectbox('Select Classification', [''] + classifications, help='Defines the primary function of the practitioner')
+    selected_classification = st.sidebar.selectbox('Select Classification', [''] + classifications, help='Defines the primary function of the practitioner', key='classification_selectbox')
 
     if selected_classification:
         # Further filter the data based on the selected classification
@@ -144,7 +142,7 @@ if selected_group:
 
         # Dropdown for specialization level
         specializations = sorted(get_next_level_options(tree_dict, [selected_group, selected_classification]))
-        selected_specialization = st.sidebar.selectbox('Select Specialization', [''] + specializations, help='Defines niche roles of the practitioner')
+        selected_specialization = st.sidebar.selectbox('Select Specialization', [''] + specializations, help='Defines niche roles of the practitioner', key='specialization_selectbox')
 
         # Determine the selected node and get the NUCC code and definition
         if selected_specialization:
@@ -154,13 +152,96 @@ if selected_group:
             filtered_data = df[df['taxon_code'] == nucc_code].copy()
         else:
             node = tree_dict[selected_group][selected_classification]
-            filtered_taxon_codes = []
-            for specialization in node:
-                if specialization != 'value' and 'value' in node[specialization]:
-                    filtered_taxon_codes.append(node[specialization]['value'].get('nucc_code', 'null'))
+            filtered_taxon_codes = get_all_taxon_codes(node)
             filtered_data = df[df['taxon_code'].isin(filtered_taxon_codes)].copy()
+    
+    else:
+        node = tree_dict[selected_group]
+        filtered_taxon_codes = get_all_taxon_codes(node)
+        filtered_data = df[df['taxon_code'].isin(filtered_taxon_codes)].copy()
 
 
+        # Additional dynamic filtering options
+        st.sidebar.header("Additional Filters")
+
+        # Options to select which filters to display
+        filter_options = st.sidebar.multiselect(
+            'Select Filters to Display',
+            ['Full_name','Tenure','Gender', 'Individual Location', 'Individual State', 'Individual County', 'Individual ZIP Code', 'Sole Proprietor', 'Telehealth','Medicare']
+        )
+
+        # Filter by gender
+        if 'Gender' in filter_options:
+            genders = sorted(filtered_data['gender'].astype(str).unique())
+            selected_gender = st.sidebar.selectbox('Select Gender', [''] + list(genders))
+            if selected_gender:
+                filtered_data = filtered_data[filtered_data['gender'] == selected_gender].copy()
+
+        # Filter by individual_location
+        if 'Individual Location' in filter_options:
+            individual_places = sorted(filtered_data['individual_place'].astype(str).unique())
+            selected_places = st.sidebar.selectbox('Select Candidate Location', [''] + list(individual_places))
+            if selected_places:
+                filtered_data = filtered_data[filtered_data['individual_place'] == selected_places].copy()
+
+        # Filter by individual_state
+        if 'Individual State' in filter_options:
+            individual_states = sorted(filtered_data['individual_state'].astype(str).unique())
+            selected_state = st.sidebar.selectbox('Select Individual State', [''] + list(individual_states))
+            if selected_state:
+                filtered_data = filtered_data[filtered_data['individual_state'] == selected_state].copy()
+
+        # Filter by individual_county
+        if 'Individual County' in filter_options:
+            individual_counties = sorted(filtered_data['individual_county'].astype(str).unique())
+            selected_county = st.sidebar.selectbox('Select Individual County', [''] + list(individual_counties))
+            if selected_county:
+                filtered_data = filtered_data[filtered_data['individual_county'] == selected_county].copy()
+
+        # Filter by individual_zip5
+        if 'Individual ZIP Code' in filter_options:
+            individual_zip5s = sorted(filtered_data['individual_zip5'].astype(str).unique())
+            selected_zip5 = st.sidebar.selectbox('Select Individual ZIP Code', [''] + list(individual_zip5s))
+            if selected_zip5:
+                filtered_data = filtered_data[filtered_data['individual_zip5'] == selected_zip5].copy()
+
+        # Filter by telehealth
+        if 'Telehealth' in filter_options:
+            selected_telehealth = st.sidebar.checkbox('Filter by Telehealth Certification')
+            if selected_telehealth:
+                filtered_data = filtered_data[filtered_data['telehealth'] == True].copy()
+
+        # Filter by sole_proprietor
+        if 'Sole Proprietor' in filter_options:
+            selected_sole_proprietor = st.sidebar.checkbox('Filter by Sole Proprietorship')
+            if selected_sole_proprietor:
+                filtered_data = filtered_data[filtered_data['sole_proprietor'] == True].copy()
+
+        # Filter by medicare
+        if 'Medicare' in filter_options:
+            selected_medicare = st.sidebar.checkbox('Filter by Medicare')
+            if selected_medicare:
+                filtered_data = filtered_data[filtered_data['medicare_id'].notnull()].copy()
+
+        # Tenure advanced filter
+        if 'Tenure' in filter_options:
+                # Drop NA values before computing min and max
+                filtered_data_non_na_tenure = filtered_data['tenure'].dropna()
+                if not filtered_data_non_na_tenure.empty:
+                    min_tenure = int(filtered_data_non_na_tenure.min())
+                    max_tenure = int(filtered_data_non_na_tenure.max())
+                    if min_tenure < max_tenure:
+                        selected_tenure = st.sidebar.slider('Select Tenure', min_tenure, max_tenure, (min_tenure, max_tenure))
+                        filtered_data = filtered_data[(filtered_data['tenure'] >= selected_tenure[0]) & (filtered_data['tenure'] <= selected_tenure[1])]
+                    else:
+                        st.sidebar.write(f"Tenure: {min_tenure} years")
+        
+        # Filter by part of the full name
+        if 'Full Name' in filter_options:
+            name_part = st.sidebar.text_input('Filter by Full Name')
+            if name_part:
+                filtered_data = filtered_data[filtered_data['full_name'].str.contains(name_part, case=False, na=False)].copy()
+        
         # Rename columns for better display
         filtered_data = filtered_data.rename(columns={
                     'full_name':'Full Name',
@@ -226,9 +307,20 @@ if selected_group:
             grouped_data[displayed_columns], 
             key='combined_editor',
             on_select="rerun",
-            selection_mode="multi-row")    
+            selection_mode="multi-row",
+            hide_index=True)    
 
         logger.info(f"selected rows {event.selection}")
+
+        # Save the selected data into session state
+        if 'selection' in event and event['selection']:
+            selected_data = grouped_data.iloc[event['selection']]
+            st.session_state.selected_data = selected_data
+
+        # Button to navigate to the download page
+        if st.button('Go to Download Page'):
+            st.experimental_set_query_params(page='download')
+
 
 else:
     st.write("Please select a classification.")
