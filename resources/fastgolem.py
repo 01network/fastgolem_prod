@@ -155,10 +155,10 @@ if selected_group:
             filtered_taxon_codes = get_all_taxon_codes(node)
             filtered_data = df[df['taxon_code'].isin(filtered_taxon_codes)].copy()
     
-    else:
-        node = tree_dict[selected_group]
-        filtered_taxon_codes = get_all_taxon_codes(node)
-        filtered_data = df[df['taxon_code'].isin(filtered_taxon_codes)].copy()
+    # else:
+    #     node = tree_dict[selected_group]
+    #     filtered_taxon_codes = get_all_taxon_codes(node)
+    #     filtered_data = df[df['taxon_code'].isin(filtered_taxon_codes)].copy()
 
 
     # Additional dynamic filtering options
