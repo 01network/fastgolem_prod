@@ -40,10 +40,18 @@ if not st.session_state.selected_data.empty:
     
     # Display the user-specific saved data
     st.write(f"Data saved for user {user_id}:")
-    st.dataframe(st.session_state.user_data[user_id])
+    selected_downloads = st.dataframe(
+        st.session_state.user_data[user_id],
+        key='download_editor',
+        selection_mode="multi-row",
+        hide_index=False)
 
+    # Correctly handle selected downloads
+    selected_indices = selected_downloads.selection.rows
+    selected_data_for_download = st.session_state.user_data[user_id].iloc[selected_indices]
+    
     # Download button in the sidebar
-    csv = selected_data.to_csv(index=False).encode('utf-8')
+    csv = selected_data_for_download.to_csv(index=False).encode('utf-8')
     st.sidebar.download_button(
         label="Download data as CSV",
         data=csv,

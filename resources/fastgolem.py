@@ -262,6 +262,7 @@ if selected_group:
                 'medical_school':'Medical School',
                 'tenure':'Tenure',
                 'graduation_year':'Graduation Year',
+                'enumeration_date': 'Enumeration Date',
                 'gender':'Gender',
                 'full_name_other':'Full Name, other',
                 'sole_proprietor': 'Sole Proprietor',
@@ -274,7 +275,8 @@ if selected_group:
                 'geo_id':'Geo ID',
                 'lat':'Latitude',
                 'long':'Longitude',
-                'dni':'DNI'
+                'dni':'DNI',
+                'last_update_date': 'Last Career Update'
     })
 
     # Set default columns to display
