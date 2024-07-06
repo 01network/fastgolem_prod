@@ -167,59 +167,59 @@ if selected_group:
     # Options to select which filters to display
     filter_options = st.sidebar.multiselect(
         'Select Filters to Display',
-        ['Full_name','Tenure','Gender', 'Individual Location', 'Individual State', 'Individual County', 'Individual ZIP Code', 'Sole Proprietor', 'Telehealth','Medicare']
+        ['Full Name','Tenure','Gender', 'Individual Location', 'Individual State', 'Individual County', 'Individual ZIP Code', 'Sole Proprietor', 'Telehealth','Medicare']
     )
 
     # Filter by gender
     if 'Gender' in filter_options:
         genders = sorted(filtered_data['gender'].astype(str).unique())
-        selected_gender = st.sidebar.selectbox('Select Gender', [''] + list(genders))
+        selected_gender = st.sidebar.selectbox('Select Gender', [''] + list(genders), help='The gender of the candidate.')
         if selected_gender:
             filtered_data = filtered_data[filtered_data['gender'] == selected_gender].copy()
 
     # Filter by individual_location
     if 'Individual Location' in filter_options:
         individual_places = sorted(filtered_data['individual_place'].astype(str).unique())
-        selected_places = st.sidebar.selectbox('Select Candidate Location', [''] + list(individual_places))
+        selected_places = st.sidebar.selectbox('Select Candidate Location', [''] + list(individual_places), help='The city where the candidate is currently located.')
         if selected_places:
             filtered_data = filtered_data[filtered_data['individual_place'] == selected_places].copy()
 
     # Filter by individual_state
     if 'Individual State' in filter_options:
         individual_states = sorted(filtered_data['individual_state'].astype(str).unique())
-        selected_state = st.sidebar.selectbox('Select Individual State', [''] + list(individual_states))
+        selected_state = st.sidebar.selectbox('Select Individual State', [''] + list(individual_states), help='The USA State where the candidate is currently located.')
         if selected_state:
             filtered_data = filtered_data[filtered_data['individual_state'] == selected_state].copy()
 
     # Filter by individual_county
     if 'Individual County' in filter_options:
         individual_counties = sorted(filtered_data['individual_county'].astype(str).unique())
-        selected_county = st.sidebar.selectbox('Select Individual County', [''] + list(individual_counties))
+        selected_county = st.sidebar.selectbox('Select Individual County', [''] + list(individual_counties), help='The County where the candidate is currently located.')
         if selected_county:
             filtered_data = filtered_data[filtered_data['individual_county'] == selected_county].copy()
 
     # Filter by individual_zip5
     if 'Individual ZIP Code' in filter_options:
         individual_zip5s = sorted(filtered_data['individual_zip5'].astype(str).unique())
-        selected_zip5 = st.sidebar.selectbox('Select Individual ZIP Code', [''] + list(individual_zip5s))
+        selected_zip5 = st.sidebar.selectbox('Select Individual ZIP Code', [''] + list(individual_zip5s), help='The ZIP code where the candidate is currently located.')
         if selected_zip5:
             filtered_data = filtered_data[filtered_data['individual_zip5'] == selected_zip5].copy()
 
     # Filter by telehealth
     if 'Telehealth' in filter_options:
-        selected_telehealth = st.sidebar.checkbox('Filter by Telehealth Certification')
+        selected_telehealth = st.sidebar.checkbox('Filter by Telehealth Certification', help='Check this option to only view Telehealth certified candidates.')
         if selected_telehealth:
             filtered_data = filtered_data[filtered_data['telehealth'] == True].copy()
 
     # Filter by sole_proprietor
     if 'Sole Proprietor' in filter_options:
-        selected_sole_proprietor = st.sidebar.checkbox('Filter by Sole Proprietorship')
+        selected_sole_proprietor = st.sidebar.checkbox('Filter by Sole Proprietorship', help='Check this box to only view candidates that working independently.')
         if selected_sole_proprietor:
             filtered_data = filtered_data[filtered_data['sole_proprietor'] == True].copy()
 
     # Filter by medicare
     if 'Medicare' in filter_options:
-        selected_medicare = st.sidebar.checkbox('Filter by Medicare')
+        selected_medicare = st.sidebar.checkbox('Filter by Medicare', help='Check this box to only view candidates that are enrolled in Medicare.')
         if selected_medicare:
             filtered_data = filtered_data[filtered_data['medicare_id'].notnull()].copy()
 
@@ -231,7 +231,7 @@ if selected_group:
                 min_tenure = int(filtered_data_non_na_tenure.min())
                 max_tenure = int(filtered_data_non_na_tenure.max())
                 if min_tenure < max_tenure:
-                    selected_tenure = st.sidebar.slider('Select Tenure', min_tenure, max_tenure, (min_tenure, max_tenure))
+                    selected_tenure = st.sidebar.slider('Select Tenure', min_tenure, max_tenure, (min_tenure, max_tenure), help='Tenure is the number of years the Candidate has been working in healthcare.')
                     filtered_data = filtered_data[(filtered_data['tenure'] >= selected_tenure[0]) & (filtered_data['tenure'] <= selected_tenure[1])]
                 else:
                     st.sidebar.write(f"Tenure: {min_tenure} years")
@@ -319,6 +319,8 @@ if selected_group:
         selected_data = grouped_data.iloc[event.selection.rows]
         st.session_state.selected_data = selected_data
 
+    st.session_state.df = df
+    logger.info(f"Dataframe inserted in Session State")
 
 else:
     st.write("Please select a classification.")
