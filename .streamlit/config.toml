@@ -8,3 +8,14 @@ gatherUsageStats = false
 [theme]
 base="light"
 font="serif"
+primaryColor = "orange"
+
+[logger]
+level = "info"
+messageFormat = "%(asctime)s %(message)s"
+
+[client]
+caching = true
+showErrorDetails = false
+showSidebarNavigation = true
+maxUploadSize = 1000
