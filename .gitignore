@@ -140,3 +140,5 @@ cython_debug/
 # Data folders
 .data/hcp_data.csv
 
+# Streamlit secrets
+# .streamlit/secrets.toml

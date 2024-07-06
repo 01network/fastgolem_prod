@@ -13,7 +13,7 @@ secrets = st.secrets
 # Ensure .data folder exists
 data_folder = '.data'
 os.makedirs(data_folder, exist_ok=True)
-logger.info(f"./data folder created")
+logger.info(f"/.data folder created")
 
 # Check if the file .data/hcp_data.csv exists
 if os.path.exists(os.path.join(data_folder, 'hcp_data.csv')):
@@ -48,6 +48,8 @@ def save_uploaded_file(uploaded_file):
     logger.info(f"File {uploaded_file.name} saved successfully")
 
 # # File upload section
+# st.title("CSV File Upload")
+
 if not st.session_state.file_uploaded:
     uploaded_file = st.file_uploader("Choose a CSV file", type="csv")
     if uploaded_file is not None:
@@ -68,6 +70,7 @@ def login():
             if username in secrets.admin and secrets.admin[username] == password:
                 st.session_state.role = role
                 st.session_state.username = username
+                st.session_state.user = {"username": username, "role": role}
                 st.sidebar.success(f"Logged in as {role}")
                 logger.info(f"Admin {username} logged in")
                 st.rerun()
@@ -83,7 +86,8 @@ def login():
             if username in secrets.user and secrets.user[username] == password:
                 st.session_state.role = role
                 st.session_state.username = username
-                st.sidebar.success(f"Logged in as {role}")
+                st.session_state.user = {"username": username, "role": role}
+                st.sidebar.success(f"{username} in as {role}")
                 logger.info(f"User {username} logged in")
                 st.rerun()
             else:
@@ -92,13 +96,17 @@ def login():
     else:
         if st.button("Log In"):
             st.session_state.role = role
+            st.session_state.user = {"username": "Visitor", "role": role}
             logger.info(f"Visitor User log in successful")
             st.sidebar.success(f"Logged in as {role}")
             st.rerun()
 
 def logout():
+    st.session_state.user = None
     st.session_state.role = None
     st.session_state.file_uploaded = False
+    st.session_state.df = None
+    st.session_state.selection =  None
     st.rerun()
 
 role = st.session_state.role
